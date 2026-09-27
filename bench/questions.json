@@ -1,0 +1,160 @@
+{
+  "repos": {
+    "fastapi-template": {
+      "url": "https://github.com/fastapi/full-stack-fastapi-template",
+      "dir": "full-stack-fastapi-template",
+      "commit": "cb740b656d7a0a6c5e12c7bf8e50343ec94ee9c7"
+    },
+    "ltx-2-mlx": {
+      "url": "https://github.com/dgrauet/ltx-2-mlx",
+      "dir": "ltx-2-mlx",
+      "commit": "b89155bc8b2d28503000ebdc967da749e0c56849"
+    },
+    "avoid-ai-writing": {
+      "url": "https://github.com/conorbronsdon/avoid-ai-writing",
+      "dir": "avoid-ai-writing",
+      "commit": "2a7e99946510004d78faf96987c2435d2d7d6b4b"
+    }
+  },
+  "questions": [
+    {
+      "id": "callers",
+      "kind": "structural",
+      "repo": "ltx-2-mlx",
+      "prompt": "Which functions call diffusion_decode_budget_bytes? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "_validate_diffvae_tiling",
+        "resolve_tiling",
+        "decode_and_stream",
+        "cli.py",
+        "blocks.py"
+      ]
+    },
+    {
+      "id": "callees",
+      "kind": "structural",
+      "repo": "ltx-2-mlx",
+      "prompt": "What functions does auto_tile_config call? List the callee names only.",
+      "must": [
+        "_candidates",
+        "_plane_tokens",
+        "_stage4_feature_bytes",
+        "_stage5_bytes_per_token",
+        "estimate_untiled_bytes",
+        "output_fhw"
+      ]
+    },
+    {
+      "id": "symbol-source",
+      "kind": "structural",
+      "repo": "ltx-2-mlx",
+      "prompt": "Show the exact source of the resolve_tiling method. Answer with its file:line range and the code only.",
+      "must": [
+        "blocks.py",
+        "def resolve_tiling",
+        "diffusion_decode_budget_bytes"
+      ]
+    },
+    {
+      "id": "architecture",
+      "kind": "structural",
+      "repo": "fastapi-template",
+      "prompt": "List the top-level source modules of this app and one line on what each is responsible for. No preamble.",
+      "must": [
+        "backend",
+        "frontend",
+        "crud"
+      ]
+    },
+    {
+      "id": "call-chain",
+      "kind": "structural",
+      "repo": "fastapi-template",
+      "prompt": "Trace the call chain from the HTTP endpoint that lets an admin create a user down to the database write. Answer as an ordered list of file:line steps.",
+      "must": [
+        "users.py",
+        "crud.py",
+        "commit"
+      ]
+    },
+    {
+      "id": "route-scan",
+      "kind": "structural",
+      "repo": "fastapi-template",
+      "prompt": "List every HTTP route the backend exposes, with the handler for each. file:line per route, no prose.",
+      "must": [
+        "login.py",
+        "users.py",
+        "items.py",
+        "utils.py",
+        "private.py"
+      ]
+    },
+    {
+      "id": "config-value",
+      "kind": "exact",
+      "repo": "fastapi-template",
+      "prompt": "What URL prefix are the API routes mounted under, and which setting in which file defines it? One line.",
+      "must": [
+        "/api/v1",
+        "API_V1_STR",
+        "config.py"
+      ]
+    },
+    {
+      "id": "env-flag",
+      "kind": "exact",
+      "repo": "ltx-2-mlx",
+      "prompt": "Which files define a constant holding the environment variable name LTX2_VAE_DECODE_BUDGET_GB? Give file:line for each.",
+      "must": [
+        "video_vae.py",
+        "138",
+        "tiling.py",
+        "461"
+      ]
+    },
+    {
+      "id": "error-string",
+      "kind": "exact",
+      "repo": "fastapi-template",
+      "prompt": "Find where login rejects a wrong password. Give the file:line and the exact error message.",
+      "must": [
+        "login.py",
+        "34",
+        "Incorrect email or password"
+      ]
+    },
+    {
+      "id": "class-def",
+      "kind": "exact",
+      "repo": "fastapi-template",
+      "prompt": "Which file and line defines the Settings class? One line.",
+      "must": [
+        "config.py",
+        "15"
+      ]
+    },
+    {
+      "id": "const-value",
+      "kind": "exact",
+      "repo": "ltx-2-mlx",
+      "prompt": "What is the value of DEFAULT_IMAGE_CRF, and which files define it? One line.",
+      "must": [
+        "33",
+        "constants.py",
+        "media_io.py"
+      ]
+    },
+    {
+      "id": "import-site",
+      "kind": "exact",
+      "repo": "avoid-ai-writing",
+      "prompt": "Which files in bin/ load the detector module that provides analyzeText, and by what path? One line each.",
+      "must": [
+        "avoid-ai-writing.js",
+        "avoid-ai-writing-gate.js",
+        "detector/patterns.js"
+      ]
+    }
+  ]
+}
