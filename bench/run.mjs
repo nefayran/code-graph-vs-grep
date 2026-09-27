@@ -7,6 +7,7 @@
 //   node bench/run.mjs --model claude-haiku-4-5-20251001 --reps 3
 //   node bench/run.mjs --only graph --ids callers,route-scan --reps 1
 //   node bench/run.mjs --arms graph-unguided --reps 1
+//   node bench/run.mjs --questions bench/questions-large.json --model claude-sonnet-5 --reps 2
 //
 // Arms. All of them pass --strict-mcp-config, so MCP servers from the user's config never leak in.
 //   graph           this repo's server.mjs (cbm-lean) plus Read, Grep, Glob, with the routing rule
@@ -52,7 +53,8 @@ const CBM = process.env.CBM_BIN || "codebase-memory-mcp";
 const BENCH_DIR = process.env.CBM_BENCH_DIR || join(homedir(), "cbm-bench", "repos");
 const OUT = arg("out", join(ROOT, "results", `${MODEL}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, "")}.json`));
 
-const spec = JSON.parse(readFileSync(join(HERE, "questions.json"), "utf8"));
+const QUESTIONS_FILE = arg("questions", join(HERE, "questions.json"));
+const spec = JSON.parse(readFileSync(QUESTIONS_FILE, "utf8"));
 const QUESTIONS = spec.questions.filter((q) => !IDS || IDS.includes(q.id));
 
 const TOOLS = ["Read", "Grep", "Glob"];
@@ -162,7 +164,8 @@ const version = async (bin, args) => {
   try { return (await exec(bin, args, { env: childEnv })).stdout.trim().split("\n")[0]; } catch { return "unknown"; }
 };
 const meta = {
-  model: MODEL, reps: REPS, arms: ARM_LIST, toolSearch: TOOL_SEARCH, started: new Date().toISOString(),
+  model: MODEL, reps: REPS, arms: ARM_LIST, toolSearch: TOOL_SEARCH, questions: QUESTIONS_FILE.split("/").pop(),
+  started: new Date().toISOString(),
   claude: await version(CLAUDE, ["--version"]), cbm: await version(CBM, ["--version"]),
   repos: Object.fromEntries(Object.entries(spec.repos).map(([n, r]) => [n, `${r.url}@${r.commit.slice(0, 12)}`])),
 };
