@@ -11,7 +11,8 @@ and arm the median over repetitions is used. For each model, size bucket and kin
 - the median of per-question cost ratios (graph / grep) with a bootstrap 95% interval over questions;
 - accuracy per arm with an exact binomial 95% interval, and tokenEquiv per correct answer.
 
-H4 is read from the first model call's prompt tokens per arm.
+H4 is read from the first model call's prompt tokens, paired per question. A descriptive table per repository
+follows.
 """
 import json
 import statistics as st
@@ -105,15 +106,37 @@ def main(paths):
         pc = [t["acc"][arm][3] for arm in ("graph", "grep")]
         print(f"| {m} | {b} | {k} | {cells_[0]} | {cells_[1]} | {pc[0]:,.0f} | {pc[1]:,.0f} |")
 
-    print("\nH4, first model call prompt tokens (median):")
-    first = defaultdict(list)
+    # H4 is paired: per model, repository and question, the graph arm's first-call prompt minus the grep arm's
+    # (medians over repetitions). A difference of pooled medians mixes repositories whose own instruction files
+    # differ by 12k tokens, and models whose tokenizers count the same schemas differently.
+    print("\nH4, first model call prompt tokens, graph minus grep, paired per question (median):")
+    gaps = defaultdict(list)
+    by_q = defaultdict(lambda: defaultdict(list))
     for r in runs:
         if r.get("firstCallPrompt"):
-            first[(BUCKET.get(r["repo"], r["repo"]), r["arm"])].append(r["firstCallPrompt"])
-    for b in ORDER:
-        if first.get((b, "graph")) and first.get((b, "grep")):
-            g, n = st.median(first[(b, "graph")]), st.median(first[(b, "grep")])
-            print(f"  {b}: graph {g:,.0f}, grep {n:,.0f}, difference {g - n:,.0f}")
+            by_q[(r["model"], r["repo"], r["id"])][r["arm"]].append(r["firstCallPrompt"])
+    for (m, repo, _), arms in by_q.items():
+        if arms.get("graph") and arms.get("grep"):
+            gaps[(m, BUCKET.get(repo, repo))].append(st.median(arms["graph"]) - st.median(arms["grep"]))
+    for m in sorted({k[0] for k in gaps}):
+        row = [f"{b} {st.median(gaps[(m, b)]):,.0f} (n={len(gaps[(m, b)])})" for b in ORDER if gaps.get((m, b))]
+        print(f"  {m}: " + ", ".join(row))
+
+    print("\nPer repository (descriptive, no tests):")
+    print("| model | repository | kind | questions | ratio, median | graph cheaper on | correct, graph | correct, grep | model calls, graph | model calls, grep |")
+    print("|---|---|---|---:|---:|---:|---|---|---:|---:|")
+    per = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    for r in runs:
+        per[(r["model"], r["repo"], r["kind"])][r["id"]][r["arm"]].append(r)
+    for key in sorted(per, key=lambda k: (k[0], ORDER.index(BUCKET.get(k[1], "large")), k[1], k[2])):
+        qs = per[key]
+        both = [a for a in qs.values() if a.get("graph") and a.get("grep")]
+        ratios = [st.median(x["tokenEquiv"] for x in a["graph"]) / st.median(x["tokenEquiv"] for x in a["grep"]) for a in both]
+        calls = {arm: st.median(st.median(x["modelCalls"] for x in a[arm]) for a in both) for arm in ("graph", "grep")}
+        acc = {arm: (sum(x["correct"] for a in qs.values() for x in a.get(arm, [])),
+                     sum(len(a.get(arm, [])) for a in qs.values())) for arm in ("graph", "grep")}
+        print(f"| {key[0]} | {key[1]} | {key[2]} | {len(both)} | {st.median(ratios):.2f} | {sum(x < 1 for x in ratios)} of {len(both)} "
+              f"| {acc['graph'][0]}/{acc['graph'][1]} | {acc['grep'][0]}/{acc['grep'][1]} | {calls['graph']:.0f} | {calls['grep']:.0f} |")
 
     pr = sum(r.get("premiumRequests", 0) for r in runs)
     print(f"\npremium requests in these runs: {pr:.2f}")

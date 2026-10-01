@@ -128,3 +128,8 @@ The run stops at 800 premium requests.
   other failure is still left out and counted, not rerun. One sonnet run that was in flight when the round was
   stopped was lost and is run again. The haiku failure above may have been the same kind, but its stderr was not
   recorded, so it stays left out.
+- 2026-10-01, after the last round, in the analysis script: H4 was computed as the difference of pooled medians
+  per size bucket. In the large bucket that mixes kubernetes and vscode, whose instruction files differ by about
+  12k tokens, and it mixes models whose tokenizers count the same schemas differently, so the pooled medians
+  gave a gap of 6.4k that no single question shows. H4 is now paired: per model, repository and question, graph
+  minus grep. The script also prints a descriptive table per repository. Nothing else in the analysis changed.
