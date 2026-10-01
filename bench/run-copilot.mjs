@@ -45,6 +45,9 @@ const BENCH_DIR = process.env.CBM_BENCH_DIR || join(homedir(), "cbm-bench", "rep
 const OUT = arg("out", join(ROOT, "results", "v2", `${MODEL}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, "")}.json`));
 const LEDGER = join(ROOT, "results", "v2-ledger.json");
 // Premium requests per prompt, measured in the pilot (2026-10-01).
+const CATALOG_FAILURE = /Failed to load models|Model catalog request timed out|could not retrieve the list of available models/i;
+const CATALOG_RETRIES = 4;
+const CATALOG_WAIT_MS = Number(process.env.CBM_BENCH_CATALOG_WAIT_MS) || 60 * 1000;
 const FAILED_LOGS = join(tmpdir(), "copilot-bench-failed");
 const MULTIPLIER = { "claude-haiku-4.5": 0.33, "claude-sonnet-5": 1, "claude-opus-5.5": 15 };
 
@@ -124,25 +127,43 @@ function charge(premium) {
   return l.premiumRequests;
 }
 
+function failedRun(err, armName, q, logDir, started, catalogRetries) {
+  // Keep the failed session's log for diagnosis, outside the repository (it is not scrubbed).
+  const kept = join(FAILED_LOGS, `${MODEL}-${q.id}-${armName}-${started}`);
+  try { mkdirSync(FAILED_LOGS, { recursive: true }); renameSync(logDir, kept); } catch { rmSync(logDir, { recursive: true, force: true }); }
+  const tail = (text) => scrub(String(text ?? "")).trim().slice(-600);
+  // A failed run may still have been charged; book the model's multiplier so the budget stays conservative.
+  return { arm: armName, id: q.id, kind: q.kind, repo: q.repo, model: MODEL, ledger: charge(MULTIPLIER[MODEL] ?? 1),
+    error: tail(err.stderr) || scrub(String(err.message)).slice(0, 400), exitCode: err.code ?? null,
+    signal: err.signal ?? null, killed: Boolean(err.killed), wallMs: Date.now() - started, stdoutTail: tail(err.stdout),
+    catalogRetries };
+}
+
 async function runOne(armName, q) {
   const arm = ARMS[armName];
   const cwd = join(BENCH_DIR, spec.repos[q.repo].dir);
-  const logDir = mkdtempSync(join(tmpdir(), "copilot-bench-"));
-  const started = Date.now();
-  let stdout;
-  try {
-    ({ stdout } = await exec(COPILOT, ["-p", arm.prefix + q.prompt, "--model", MODEL, ...COMMON, "--log-dir", logDir, ...arm.flags],
-      { cwd, env: childEnv, maxBuffer: 64 * 1024 * 1024, timeout: 15 * 60 * 1000 }));
-  } catch (err) {
-    // Keep the failed session's log for diagnosis, outside the repository (it is not scrubbed).
-    const kept = join(FAILED_LOGS, `${MODEL}-${q.id}-${armName}-${started}`);
-    try { mkdirSync(FAILED_LOGS, { recursive: true }); renameSync(logDir, kept); } catch { rmSync(logDir, { recursive: true, force: true }); }
-    const tail = (text) => scrub(String(text ?? "")).trim().slice(-600);
-    // A failed run was still charged; book the model's multiplier so the budget stays conservative.
-    return { arm: armName, id: q.id, kind: q.kind, repo: q.repo, model: MODEL, ledger: charge(MULTIPLIER[MODEL] ?? 1),
-      error: tail(err.stderr) || scrub(String(err.message)).slice(0, 400), exitCode: err.code ?? null,
-      signal: err.signal ?? null, killed: Boolean(err.killed), wallMs: Date.now() - started, stdoutTail: tail(err.stdout) };
+  let logDir, started, stdout;
+  let catalogRetries = 0;
+  for (;;) {
+    logDir = mkdtempSync(join(tmpdir(), "copilot-bench-"));
+    started = Date.now();
+    try {
+      ({ stdout } = await exec(COPILOT, ["-p", arm.prefix + q.prompt, "--model", MODEL, ...COMMON, "--log-dir", logDir, ...arm.flags],
+        { cwd, env: childEnv, maxBuffer: 64 * 1024 * 1024, timeout: 15 * 60 * 1000 }));
+      break;
+    } catch (err) {
+      // Copilot could not fetch its model catalog, so no session was opened and no model was called: not a run.
+      if (CATALOG_FAILURE.test(String(err.stderr ?? "")) && catalogRetries < CATALOG_RETRIES) {
+        rmSync(logDir, { recursive: true, force: true });
+        catalogRetries += 1;
+        process.stderr.write(`  model catalog failure on ${q.id} (${armName}), retry ${catalogRetries} in ${CATALOG_WAIT_MS / 1000} s\n`);
+        await new Promise((resolve) => setTimeout(resolve, CATALOG_WAIT_MS));
+        continue;
+      }
+      return failedRun(err, armName, q, logDir, started, catalogRetries);
+    }
   }
+
   const { result, toolCalls, answer } = parseEvents(stdout);
   const calls = usageFromLog(logDir);
   rmSync(logDir, { recursive: true, force: true });
@@ -163,7 +184,7 @@ async function runOne(armName, q) {
     correct: missing.length === 0, missing,
     valid: leaked.length === 0, leaked,
     toolCalls, wallMs: Date.now() - started, apiMs: result.usage?.totalApiDurationMs ?? null,
-    exitCode: result.exitCode,
+    exitCode: result.exitCode, catalogRetries,
     answer: scrub(answer),
   };
 }
@@ -179,14 +200,26 @@ const meta = {
 };
 mkdirSync(dirname(OUT), { recursive: true });
 
+// --resume keeps the runs already in --out and skips them. Runs that failed on the model catalog never reached a
+// model, so they are run again; any other failure stays recorded and is not rerun.
+const runs = [];
+const done = new Set();
+if (argv.includes("--resume") && existsSync(OUT)) {
+  const prev = JSON.parse(readFileSync(OUT, "utf8"));
+  const kept = prev.runs.filter((r) => !(r.error && CATALOG_FAILURE.test(r.error)));
+  runs.push(...kept);
+  for (const r of kept) done.add(`${r.rep}|${r.id}|${r.arm}`);
+  meta.started = prev.meta?.started ?? meta.started;
+  meta.resumed = [...(prev.meta?.resumed ?? []), new Date().toISOString()];
+  process.stderr.write(`resuming ${OUT}: ${kept.length} runs kept, ${prev.runs.length - kept.length} catalog failures to run again\n`);
+}
 const jobs = [];
 for (let rep = 1; rep <= REPS; rep++) {
   for (const q of QUESTIONS) {
     const order = ARM_LIST.map((_, i) => ARM_LIST[(i + rep - 1) % ARM_LIST.length]);
-    for (const arm of order) jobs.push({ rep, q, arm });
+    for (const arm of order) if (!done.has(`${rep}|${q.id}|${arm}`)) jobs.push({ rep, q, arm });
   }
 }
-const runs = [];
 let stopped = false;
 async function worker() {
   while (jobs.length && !stopped) {

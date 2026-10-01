@@ -121,3 +121,10 @@ The run stops at 800 premium requests.
   Copilot opened a session, and the driver kept only the start of the command line, so the cause is unknown. As
   the analysis section says, it is left out and counted, not rerun. From the sonnet round on, the driver records
   a failed run's exit code, signal, wall time and the end of its stderr.
+- 2026-10-01, at the start of the sonnet round: 3 of the first 8 runs failed with "Failed to load models: Model
+  catalog request timed out after 30000ms". Copilot exits before it opens a session, so no model is called and
+  nothing about the arm is observed. The round was stopped. The driver now waits 60 s and retries such a failure
+  up to 4 times, and `--resume` keeps the runs already recorded and runs the rest, catalog failures included. Any
+  other failure is still left out and counted, not rerun. One sonnet run that was in flight when the round was
+  stopped was lost and is run again. The haiku failure above may have been the same kind, but its stderr was not
+  recorded, so it stays left out.
