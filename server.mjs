@@ -67,6 +67,12 @@ function strip(v) {
         continue;
       }
       if (val === null || val === false) continue; // absent flags are not information
+      // cbm's snippet carries `lines` (the definition's length) next to start_line. Models read it as a line
+      // number: in benchmark v2 haiku and sonnet answered horizontal.go:43 for a struct on line 93, 43 lines long.
+      if (k === "lines" && typeof val === "number") {
+        out.line_count = val;
+        continue;
+      }
       out[k] = strip(val);
     }
     return out;
