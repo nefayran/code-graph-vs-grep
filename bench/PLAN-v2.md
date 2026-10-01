@@ -117,3 +117,7 @@ The run stops at 800 premium requests.
   vscode's `.github/copilot-instructions.md` and `.github/instructions/` about 12.4k, to both arms alike.
   vscode's file also tells agents to "grep for exact strings: use grep for error messages or specific function
   names", which reaches the graph arm along with v1's routing guide.
+- 2026-10-01, during the haiku round: one run (`kubernetes-impact-1`, graph arm, repetition 3) failed before
+  Copilot opened a session, and the driver kept only the start of the command line, so the cause is unknown. As
+  the analysis section says, it is left out and counted, not rerun. From the sonnet round on, the driver records
+  a failed run's exit code, signal, wall time and the end of its stderr.

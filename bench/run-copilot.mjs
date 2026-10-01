@@ -19,7 +19,7 @@
 // Premium requests are added to results/v2-ledger.json, and no run starts once the ledger reaches --budget.
 
 import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -45,6 +45,7 @@ const BENCH_DIR = process.env.CBM_BENCH_DIR || join(homedir(), "cbm-bench", "rep
 const OUT = arg("out", join(ROOT, "results", "v2", `${MODEL}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, "")}.json`));
 const LEDGER = join(ROOT, "results", "v2-ledger.json");
 // Premium requests per prompt, measured in the pilot (2026-10-01).
+const FAILED_LOGS = join(tmpdir(), "copilot-bench-failed");
 const MULTIPLIER = { "claude-haiku-4.5": 0.33, "claude-sonnet-5": 1, "claude-opus-5.5": 15 };
 
 const QUESTIONS_FILE = arg("questions", join(HERE, "questions-v2.json"));
@@ -133,10 +134,14 @@ async function runOne(armName, q) {
     ({ stdout } = await exec(COPILOT, ["-p", arm.prefix + q.prompt, "--model", MODEL, ...COMMON, "--log-dir", logDir, ...arm.flags],
       { cwd, env: childEnv, maxBuffer: 64 * 1024 * 1024, timeout: 15 * 60 * 1000 }));
   } catch (err) {
-    rmSync(logDir, { recursive: true, force: true });
+    // Keep the failed session's log for diagnosis, outside the repository (it is not scrubbed).
+    const kept = join(FAILED_LOGS, `${MODEL}-${q.id}-${armName}-${started}`);
+    try { mkdirSync(FAILED_LOGS, { recursive: true }); renameSync(logDir, kept); } catch { rmSync(logDir, { recursive: true, force: true }); }
+    const tail = (text) => scrub(String(text ?? "")).trim().slice(-600);
     // A failed run was still charged; book the model's multiplier so the budget stays conservative.
     return { arm: armName, id: q.id, kind: q.kind, repo: q.repo, model: MODEL, ledger: charge(MULTIPLIER[MODEL] ?? 1),
-      error: scrub(String(err.message)).slice(0, 400) };
+      error: tail(err.stderr) || scrub(String(err.message)).slice(0, 400), exitCode: err.code ?? null,
+      signal: err.signal ?? null, killed: Boolean(err.killed), wallMs: Date.now() - started, stdoutTail: tail(err.stdout) };
   }
   const { result, toolCalls, answer } = parseEvents(stdout);
   const calls = usageFromLog(logDir);
