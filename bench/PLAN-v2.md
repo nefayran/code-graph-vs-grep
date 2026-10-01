@@ -110,3 +110,10 @@ The run stops at 800 premium requests.
   large repository. They are picked by position in `questions-v2.json`, not by results (part of the haiku round
   was in when this was written): the first two of each structural type, so `callers-1`, `callers-2`, `chain-1`,
   `chain-2`, `impact-1` and `impact-2` on kubernetes and on vscode. `callees-1` and `impact-3` are left out.
+- 2026-10-01, a correction to the Harness section, from the haiku runs: the pilot's 49k and 38k to 40k first-call
+  figures were measured on ltx-2-mlx, whose 104 KB CLAUDE.md Copilot puts into the system prompt as a
+  `<custom_instruction>` block. On the benchmark repositories the first call carries about 3.8k prompt tokens in
+  the grep arm and 5.3k in the graph arm (FastAPI template, dub). kubernetes's AGENTS.md adds about 0.6k, and
+  vscode's `.github/copilot-instructions.md` and `.github/instructions/` about 12.4k, to both arms alike.
+  vscode's file also tells agents to "grep for exact strings: use grep for error messages or specific function
+  names", which reaches the graph arm along with v1's routing guide.
