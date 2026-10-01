@@ -106,4 +106,7 @@ The run stops at 800 premium requests.
 
 ## Changes after start
 
-(none yet)
+- 2026-10-01, before the opus run: the budget above gives the opus subset only as "6 structural questions" per
+  large repository. They are picked by position in `questions-v2.json`, not by results (part of the haiku round
+  was in when this was written): the first two of each structural type, so `callers-1`, `callers-2`, `chain-1`,
+  `chain-2`, `impact-1` and `impact-2` on kubernetes and on vscode. `callees-1` and `impact-3` are left out.
