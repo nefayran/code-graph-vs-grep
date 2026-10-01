@@ -1,0 +1,229 @@
+{
+  "repos": {
+    "kubernetes": {
+      "url": "https://github.com/kubernetes/kubernetes",
+      "dir": "kubernetes",
+      "commit": "6d805ebe018f428d503fdc01bb6d57bd9574f598"
+    }
+  },
+  "questions": [
+    {
+      "id": "kubernetes-callers-1",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "kubernetes",
+      "prompt": "Which functions call RecheckDeletionTimestamp? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "claimPods",
+        "getPodsForJob",
+        "getReplicaSetsForDeployment",
+        "getDaemonPods",
+        "controlledHistories",
+        "canAdoptFunc",
+        "replica_set.go",
+        "job_controller.go",
+        "deployment_controller.go",
+        "daemon_controller.go",
+        "update.go",
+        "stateful_set.go"
+      ]
+    },
+    {
+      "id": "kubernetes-callers-2",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "kubernetes",
+      "prompt": "Which functions call MakeNestedMountpoints? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "SetUpAt",
+        "configmap.go",
+        "secret.go",
+        "projected.go",
+        "downwardapi.go"
+      ]
+    },
+    {
+      "id": "kubernetes-callees-1",
+      "kind": "structural",
+      "type": "callees",
+      "repo": "kubernetes",
+      "prompt": "What functions does GetEtcdImageTagFromStaticPod call? List the callee names only.",
+      "must": [
+        "GetStaticPodFilepath",
+        "ReadStaticPodFromDisk",
+        "TagFromImage",
+        "convertImageTagMetadataToSemver"
+      ]
+    },
+    {
+      "id": "kubernetes-chain-1",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "kubernetes",
+      "prompt": "Trace the call chain from the RunE handler of the \"kubeadm token create\" command down to encodeTokenSecretData. Ignore tests. List every function on the path in order, with file:line for each, nothing else.",
+      "must": [
+        "RunCreateToken",
+        "CreateNewTokens",
+        "UpdateOrCreateTokens",
+        "BootstrapTokenToSecret",
+        "encodeTokenSecretData",
+        "token.go",
+        "utils.go"
+      ]
+    },
+    {
+      "id": "kubernetes-chain-2",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "kubernetes",
+      "prompt": "Trace the call chain from the IPAddress add event handler addIPAddress in pkg/controller/servicecidrs/servicecidrs_controller.go down to PrefixContainsIP. Ignore tests. List every function on the path in order, with file:line for each, nothing else.",
+      "must": [
+        "addIPAddress",
+        "containingServiceCIDRs",
+        "ContainsAddress",
+        "PrefixContainsIP",
+        "servicecidrs_controller.go",
+        "servicecidr.go"
+      ]
+    },
+    {
+      "id": "kubernetes-impact-1",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "kubernetes",
+      "prompt": "If the signature of HashContainer changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "containerChanged",
+        "newContainerAnnotations",
+        "computePodActions",
+        "computeInitContainerActions",
+        "generateContainerConfig",
+        "kuberuntime_manager.go",
+        "labels.go",
+        "kuberuntime_container.go"
+      ]
+    },
+    {
+      "id": "kubernetes-impact-2",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "kubernetes",
+      "prompt": "If the signature of ConvertDownwardAPIFieldLabel changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "validateObjectFieldSelector",
+        "podFieldSelectorRuntimeValue",
+        "validateDownwardAPIVolumeFile",
+        "validateEnvVarValueFrom",
+        "makeEnvironmentVariables",
+        "validation.go",
+        "kubelet_pods.go"
+      ]
+    },
+    {
+      "id": "kubernetes-impact-3",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "kubernetes",
+      "prompt": "If the signature of GetNameForAuthorizerMode changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "LoadAndValidateData",
+        "buildAuthorizationConfiguration",
+        "LoadAndValidateFile",
+        "checkFile",
+        "ToAuthorizationConfig",
+        "config.go",
+        "authorization.go",
+        "reload.go"
+      ]
+    },
+    {
+      "id": "kubernetes-config-1",
+      "kind": "exact",
+      "type": "config",
+      "repo": "kubernetes",
+      "prompt": "What default does the kubelet apply to MaxPods when KubeletConfiguration leaves it unset, and which function in which file sets it? One line.",
+      "must": [
+        "110",
+        "SetDefaults_KubeletConfiguration",
+        "defaults.go"
+      ]
+    },
+    {
+      "id": "kubernetes-config-2",
+      "kind": "exact",
+      "type": "config",
+      "repo": "kubernetes",
+      "prompt": "What is the value of ProxyHealthzPort, and which file defines it? One line.",
+      "must": [
+        "10256",
+        "ports.go"
+      ]
+    },
+    {
+      "id": "kubernetes-env-1",
+      "kind": "exact",
+      "type": "env",
+      "repo": "kubernetes",
+      "prompt": "Which Go function reads the KUBE_PROXY_NFTABLES_SKIP_KERNEL_VERSION_CHECK environment variable? Answer with the file and function name, one line.",
+      "must": [
+        "supported.go",
+        "getNFTablesInterface"
+      ]
+    },
+    {
+      "id": "kubernetes-env-2",
+      "kind": "exact",
+      "type": "env",
+      "repo": "kubernetes",
+      "prompt": "Which Go function reads the KUBE_NETWORK environment variable? Answer with the file and function name, one line.",
+      "must": [
+        "proxier.go",
+        "getNetworkName"
+      ]
+    },
+    {
+      "id": "kubernetes-error-1",
+      "kind": "exact",
+      "type": "error",
+      "repo": "kubernetes",
+      "prompt": "Where is the error \"DisruptedPods map too big - too many evictions not confirmed by PDB controller\" raised? Ignore tests. Give the file:line, nothing else.",
+      "must": [
+        "eviction.go",
+        "456"
+      ]
+    },
+    {
+      "id": "kubernetes-error-2",
+      "kind": "exact",
+      "type": "error",
+      "repo": "kubernetes",
+      "prompt": "Where is the message \"Scheduler cache AssumePod failed\" logged? Give the file:line, nothing else.",
+      "must": [
+        "algorithm.go",
+        "626"
+      ]
+    },
+    {
+      "id": "kubernetes-definition-1",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "kubernetes",
+      "prompt": "Which file and line defines the HorizontalController struct? One line.",
+      "must": [
+        "horizontal.go",
+        "93"
+      ]
+    },
+    {
+      "id": "kubernetes-definition-2",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "kubernetes",
+      "prompt": "Which file and line defines the CreateKubeAPIServerConfig function? One line.",
+      "must": [
+        "server.go",
+        "210"
+      ]
+    }
+  ]
+}

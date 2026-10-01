@@ -1,0 +1,229 @@
+{
+  "repos": {
+    "vscode": {
+      "url": "https://github.com/microsoft/vscode",
+      "dir": "vscode",
+      "commit": "ec2e580674cdb512aa9b2a9596ab35d8a9590f1e"
+    }
+  },
+  "questions": [
+    {
+      "id": "vscode-callers-1",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "vscode",
+      "prompt": "Which functions call toElectronAccelerator? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "getElectronAcceleratorLabelForScanCodeChord",
+        "getElectronAcceleratorForKeyBinding",
+        "_getElectronAccelerator",
+        "macLinuxKeyboardMapper.ts",
+        "windowsKeyboardMapper.ts",
+        "usLayoutResolvedKeybinding.ts"
+      ]
+    },
+    {
+      "id": "vscode-callers-2",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "vscode",
+      "prompt": "Which functions call removeDangerousEnvVariables? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "client",
+        "createEnv",
+        "_createProcess",
+        "start",
+        "_start",
+        "ipc.cp.ts",
+        "utilityProcess.ts",
+        "remoteTerminalChannel.ts",
+        "extensionHostConnection.ts",
+        "localProcessExtensionHost.ts"
+      ]
+    },
+    {
+      "id": "vscode-callees-1",
+      "kind": "structural",
+      "type": "callees",
+      "repo": "vscode",
+      "prompt": "What functions does buildUserEnvironment call? List the callee names only.",
+      "must": [
+        "getNLSConfiguration",
+        "getResolvedShellEnv",
+        "join",
+        "readCaseInsensitive",
+        "setCaseInsensitive",
+        "removeNulls"
+      ]
+    },
+    {
+      "id": "vscode-chain-1",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "vscode",
+      "prompt": "Trace the call chain from the remote server's HTTP request handler, RemoteExtensionHostAgentServer.handleRequest in src/vs/server/node/remoteExtensionHostAgentServer.ts, down to renderWorkbenchTemplate. List every function on the path in order, with file:line for each, nothing else.",
+      "must": [
+        "handleRequest",
+        "handle",
+        "_handleRoot",
+        "renderWorkbenchTemplate",
+        "remoteExtensionHostAgentServer.ts",
+        "webClientServer.ts"
+      ]
+    },
+    {
+      "id": "vscode-chain-2",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "vscode",
+      "prompt": "Trace the call chain from the CLI entry point main() in src/vs/code/node/cli.ts down to parseArgs in src/vs/platform/environment/node/argv.ts. List every function on the path in order, with file:line for each, nothing else.",
+      "must": [
+        "main",
+        "parseCLIProcessArgv",
+        "parseAndValidate",
+        "parseArgs",
+        "cli.ts",
+        "argvHelper.ts",
+        "argv.ts"
+      ]
+    },
+    {
+      "id": "vscode-impact-1",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "vscode",
+      "prompt": "If the signature of isInnoSetupInstall changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "installMutex",
+        "checkInnoSetupMutex",
+        "getWin32UpdateType",
+        "afterWindowOpen",
+        "claimInstance",
+        "getUpdateType",
+        "app.ts",
+        "main.ts",
+        "win32UpdateType.ts",
+        "updateService.win32.ts"
+      ]
+    },
+    {
+      "id": "vscode-impact-2",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "vscode",
+      "prompt": "If the signature of layoutVirtualizedSections changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "layoutMcpSectionLists",
+        "layoutPluginSectionLists",
+        "layoutMigrationSectionLists",
+        "scheduleMcpSectionLayout",
+        "schedulePluginSectionLayout",
+        "scheduleMigrationSectionLayout",
+        "mcpListWidget.ts",
+        "pluginListWidget.ts",
+        "aiCustomizationManagementEditor.ts"
+      ]
+    },
+    {
+      "id": "vscode-impact-3",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "vscode",
+      "prompt": "If the signature of sortEditsByYieldTo changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "getPasteEdits",
+        "getDropEdits",
+        "doPasteInline",
+        "showPasteAsPick",
+        "onDropIntoEditor",
+        "copyPasteController.ts",
+        "dropIntoEditorController.ts"
+      ]
+    },
+    {
+      "id": "vscode-config-1",
+      "kind": "exact",
+      "type": "config",
+      "repo": "vscode",
+      "prompt": "What is the default value of the search.maxResults setting, and which constant in which file defines it? One line.",
+      "must": [
+        "20000",
+        "DEFAULT_MAX_SEARCH_RESULTS",
+        "search.ts"
+      ]
+    },
+    {
+      "id": "vscode-config-2",
+      "kind": "exact",
+      "type": "config",
+      "repo": "vscode",
+      "prompt": "What is the value of MATCHES_LIMIT, and which file defines it? One line.",
+      "must": [
+        "19999",
+        "findModel.ts"
+      ]
+    },
+    {
+      "id": "vscode-env-1",
+      "kind": "exact",
+      "type": "env",
+      "repo": "vscode",
+      "prompt": "Which file and function read the environment variable VSCODE_CLI_ENCODING? Ignore tests. Answer with the file path and the function name, nothing else.",
+      "must": [
+        "terminalEncoding.ts",
+        "resolveTerminalEncoding"
+      ]
+    },
+    {
+      "id": "vscode-env-2",
+      "kind": "exact",
+      "type": "env",
+      "repo": "vscode",
+      "prompt": "Which file and function read the environment variable DEV_WINDOW_SRC? Answer with the file path and the function name, nothing else.",
+      "must": [
+        "ipcMain.ts",
+        "validateEvent"
+      ]
+    },
+    {
+      "id": "vscode-error-1",
+      "kind": "exact",
+      "type": "error",
+      "repo": "vscode",
+      "prompt": "Which file and line raises the error \"ModelService: Cannot add model because it already exists!\"? Answer as file:line, nothing else.",
+      "must": [
+        "modelService.ts:352"
+      ]
+    },
+    {
+      "id": "vscode-error-2",
+      "kind": "exact",
+      "type": "error",
+      "repo": "vscode",
+      "prompt": "Which file and line logs the warning \"Shell integration failed to add capabilities within 10 seconds\"? Answer as file:line, nothing else.",
+      "must": [
+        "shellIntegrationAddon.ts:460"
+      ]
+    },
+    {
+      "id": "vscode-definition-1",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "vscode",
+      "prompt": "Which file and line defines the CursorsController class? Answer as file:line, nothing else.",
+      "must": [
+        "cursor.ts:27"
+      ]
+    },
+    {
+      "id": "vscode-definition-2",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "vscode",
+      "prompt": "Which file and line defines the ContextKeyExpression type? Answer as file:line, nothing else.",
+      "must": [
+        "contextkey.ts:84"
+      ]
+    }
+  ]
+}

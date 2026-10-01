@@ -1,0 +1,888 @@
+{
+  "repos": {
+    "fastapi-template": {
+      "url": "https://github.com/fastapi/full-stack-fastapi-template",
+      "dir": "full-stack-fastapi-template",
+      "commit": "cb740b656d7a0a6c5e12c7bf8e50343ec94ee9c7"
+    },
+    "dub": {
+      "url": "https://github.com/dubinc/dub",
+      "dir": "dub",
+      "commit": "d85e8839c3ee62c916f125b5b0710eb12a1f7892"
+    },
+    "kubernetes": {
+      "url": "https://github.com/kubernetes/kubernetes",
+      "dir": "kubernetes",
+      "commit": "6d805ebe018f428d503fdc01bb6d57bd9574f598"
+    },
+    "vscode": {
+      "url": "https://github.com/microsoft/vscode",
+      "dir": "vscode",
+      "commit": "ec2e580674cdb512aa9b2a9596ab35d8a9590f1e"
+    }
+  },
+  "questions": [
+    {
+      "id": "fastapi-callers-1",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "fastapi-template",
+      "prompt": "Which functions call get_password_hash? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "create_user",
+        "update_user",
+        "update_password_me",
+        "crud.py",
+        "users.py",
+        "private.py"
+      ]
+    },
+    {
+      "id": "fastapi-callers-2",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "fastapi-template",
+      "prompt": "Which functions call isLoggedIn? Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "useAuth",
+        "_layout.tsx",
+        "login.tsx",
+        "signup.tsx",
+        "recover-password.tsx",
+        "reset-password.tsx"
+      ]
+    },
+    {
+      "id": "fastapi-callees-1",
+      "kind": "structural",
+      "type": "callees",
+      "repo": "fastapi-template",
+      "prompt": "What functions does recover_password call? List the callee names only.",
+      "must": [
+        "get_user_by_email",
+        "generate_password_reset_token",
+        "generate_reset_password_email",
+        "send_email"
+      ]
+    },
+    {
+      "id": "fastapi-v1-call-chain",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "fastapi-template",
+      "prompt": "Trace the call chain from the HTTP endpoint that lets an admin create a user down to the database write. Answer as an ordered list of file:line steps.",
+      "must": [
+        "users.py",
+        "crud.py",
+        "commit"
+      ],
+      "v1_id": "call-chain"
+    },
+    {
+      "id": "fastapi-chain-1",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "fastapi-template",
+      "prompt": "Trace the call chain from main() in backend/app/initial_data.py down to get_password_hash. List every function on the path in order, with file:line for each, nothing else.",
+      "must": [
+        "main",
+        "init",
+        "init_db",
+        "create_user",
+        "get_password_hash",
+        "initial_data.py",
+        "db.py",
+        "crud.py",
+        "security.py"
+      ]
+    },
+    {
+      "id": "fastapi-impact-1",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "fastapi-template",
+      "prompt": "If the signature of verify_password changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "authenticate",
+        "update_password_me",
+        "login_access_token",
+        "crud.py",
+        "users.py",
+        "login.py"
+      ]
+    },
+    {
+      "id": "fastapi-impact-2",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "fastapi-template",
+      "prompt": "If the signature of render_email_template changes, which non-test functions call it directly, and which functions call those? Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "generate_test_email",
+        "generate_reset_password_email",
+        "generate_new_account_email",
+        "test_email",
+        "recover_password",
+        "recover_password_html_content",
+        "create_user",
+        "utils.py",
+        "login.py",
+        "users.py"
+      ]
+    },
+    {
+      "id": "fastapi-impact-3",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "fastapi-template",
+      "prompt": "If the signature of create_user in backend/app/crud.py changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "create_user",
+        "register_user",
+        "init_db",
+        "init",
+        "users.py",
+        "db.py",
+        "initial_data.py"
+      ]
+    },
+    {
+      "id": "fastapi-v1-config-value",
+      "kind": "exact",
+      "type": "config",
+      "repo": "fastapi-template",
+      "prompt": "What URL prefix are the API routes mounted under, and which setting in which file defines it? One line.",
+      "must": [
+        "/api/v1",
+        "API_V1_STR",
+        "config.py"
+      ],
+      "v1_id": "config-value"
+    },
+    {
+      "id": "fastapi-config-1",
+      "kind": "exact",
+      "type": "config",
+      "repo": "fastapi-template",
+      "prompt": "Which JWT signing algorithm does the backend use, and which constant in which file defines it? One line.",
+      "must": [
+        "HS256",
+        "ALGORITHM",
+        "security.py"
+      ]
+    },
+    {
+      "id": "fastapi-env-1",
+      "kind": "exact",
+      "type": "env",
+      "repo": "fastapi-template",
+      "prompt": "Which function reads the MAILPIT_HOST environment variable? Answer with the file and function name, one line.",
+      "must": [
+        "mailpit.ts",
+        "waitForEmailHtml"
+      ]
+    },
+    {
+      "id": "fastapi-env-2",
+      "kind": "exact",
+      "type": "env",
+      "repo": "fastapi-template",
+      "prompt": "Which backend function uses the value of the FIRST_SUPERUSER environment variable? Ignore tests. Answer with the file and function name, one line.",
+      "must": [
+        "db.py",
+        "init_db"
+      ]
+    },
+    {
+      "id": "fastapi-v1-error-string",
+      "kind": "exact",
+      "type": "error",
+      "repo": "fastapi-template",
+      "prompt": "Find where login rejects a wrong password. Ignore tests. Give the file:line and the exact error message.",
+      "must": [
+        "login.py",
+        "34",
+        "Incorrect email or password"
+      ],
+      "v1_id": "error-string"
+    },
+    {
+      "id": "fastapi-error-1",
+      "kind": "exact",
+      "type": "error",
+      "repo": "fastapi-template",
+      "prompt": "Where is the error \"useTheme must be used within a ThemeProvider\" thrown? Give the file:line, nothing else.",
+      "must": [
+        "theme-provider.tsx",
+        "112"
+      ]
+    },
+    {
+      "id": "fastapi-v1-class-def",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "fastapi-template",
+      "prompt": "Which file and line defines the Settings class? One line.",
+      "must": [
+        "config.py",
+        "15"
+      ],
+      "v1_id": "class-def"
+    },
+    {
+      "id": "fastapi-definition-1",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "fastapi-template",
+      "prompt": "Which file and line defines the handleError function? One line.",
+      "must": [
+        "utils.ts",
+        "17"
+      ]
+    },
+    {
+      "id": "dub-v1-callers",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "dub",
+      "prompt": "Which functions or route files call createPaymentIntent? Ignore tests. Give the file:line of each call site, nothing else.",
+      "must": [
+        "renew/route.ts",
+        "renewal-payments/route.ts",
+        "retry-failed/route.ts",
+        "process-payout-invoice-failure.ts",
+        "initiate-premium-domain-registration.ts"
+      ],
+      "v1_id": "callers"
+    },
+    {
+      "id": "dub-v1-callees",
+      "kind": "structural",
+      "type": "callees",
+      "repo": "dub",
+      "prompt": "What functions does approvePartner call? List the callee names only.",
+      "must": [
+        "getGroupOrThrow",
+        "throwIfPartnersLimitExceeded",
+        "queuePartnerSearchSync",
+        "dispatchWorkflows",
+        "trackActivityLog",
+        "trackApplicationEvents"
+      ],
+      "v1_id": "callees"
+    },
+    {
+      "id": "dub-callers-1",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "dub",
+      "prompt": "Which functions call recomputePartnerPayoutState? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "recipient-configuration-updated.ts",
+        "recipient-account-closed.ts",
+        "account-updated.ts",
+        "account-application-deauthorized.ts",
+        "set-default-payout-method.ts",
+        "paypal/callback/route.ts"
+      ]
+    },
+    {
+      "id": "dub-v1-call-chain",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "dub",
+      "prompt": "Trace the call chain from the HTTP endpoint that approves a partner application down to the database write. Answer as an ordered list of file:line steps.",
+      "must": [
+        "approve/route.ts",
+        "approve-partner.ts",
+        "programEnrollment.update"
+      ],
+      "v1_id": "call-chain"
+    },
+    {
+      "id": "dub-chain-1",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "dub",
+      "prompt": "Trace the call path from the GET /api/cron/trial-emails handler down to differenceInCalendarDaysUTC. Answer as an ordered list of steps, each with the function name and file:line, nothing else.",
+      "must": [
+        "executeTrialEmailCronBatch",
+        "runTrialEmailCron",
+        "getDueTrialEmailTypes",
+        "differenceInCalendarDaysUTC"
+      ]
+    },
+    {
+      "id": "dub-impact-1",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "dub",
+      "prompt": "If the signature of fundFinancialAccount changes, which non-test functions call it directly, and which functions call those? Answer with the name and file:line of each function, as two lists (direct callers, then their callers), nothing else.",
+      "must": [
+        "createStablecoinPayout",
+        "queueStripePayouts",
+        "forceWithdrawal",
+        "send-stripe-payout/route.ts",
+        "charge-succeeded/route.ts"
+      ]
+    },
+    {
+      "id": "dub-impact-2",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "dub",
+      "prompt": "If the signature of getBillingStartDate changes, which non-test functions call it directly, and which functions call those? Answer with the name and file:line of each function, as two lists (direct callers, then their callers), nothing else.",
+      "must": [
+        "recomputeWorkspaceUsage",
+        "getNetworkInvitesUsage",
+        "updateWorkspacePlan",
+        "message-partner.ts",
+        "invite-partner-from-network.ts",
+        "invites-usage/route.ts"
+      ]
+    },
+    {
+      "id": "dub-impact-3",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "dub",
+      "prompt": "If the signature of resolvePartnerMacros changes, which non-test functions call it directly, and which functions call those? Answer with the name and file:line of each function, as two lists (direct callers, then their callers), nothing else.",
+      "must": [
+        "applyAppsFlyerParameters",
+        "extractAndResolveUtmParams",
+        "generatePartnerLink",
+        "applyGroupUtmToLink",
+        "update-default-links/route.ts",
+        "sync-group-utm-job.ts"
+      ]
+    },
+    {
+      "id": "dub-v1-config-value",
+      "kind": "exact",
+      "type": "config",
+      "repo": "dub",
+      "prompt": "What is the highest page number allowed for offset pagination in the API, and which constant in which file sets it? One line.",
+      "must": [
+        "1000",
+        "MAX_OFFSET_PAGE",
+        "api/pagination.ts"
+      ],
+      "v1_id": "config-value"
+    },
+    {
+      "id": "dub-v1-const-value",
+      "kind": "exact",
+      "type": "config",
+      "repo": "dub",
+      "prompt": "What is the value of DEFAULT_PAGINATION_LIMIT, and which file defines it? One line.",
+      "must": [
+        "100",
+        "utils/src/constants/misc.ts"
+      ],
+      "v1_id": "const-value"
+    },
+    {
+      "id": "dub-v1-env-flag",
+      "kind": "exact",
+      "type": "env",
+      "repo": "dub",
+      "prompt": "Which file reads the environment variable PARTNER_SEARCH_READ_ENABLED, and at which line?",
+      "must": [
+        "search/provider.ts",
+        "34"
+      ],
+      "v1_id": "env-flag"
+    },
+    {
+      "id": "dub-env-1",
+      "kind": "exact",
+      "type": "env",
+      "repo": "dub",
+      "prompt": "Which file and function read the environment variable VERCEL_GIT_COMMIT_REF? Answer with the file path and the function name, nothing else.",
+      "must": [
+        "send-via-resend.ts",
+        "resendEmailForOptions"
+      ]
+    },
+    {
+      "id": "dub-v1-error-string",
+      "kind": "exact",
+      "type": "error",
+      "repo": "dub",
+      "prompt": "Where does the API reject a metadata filter that mixes AND and OR? Give the file and the exact error message.",
+      "must": [
+        "metadata-filters.ts",
+        "Metadata query cannot mix AND and OR"
+      ],
+      "v1_id": "error-string"
+    },
+    {
+      "id": "dub-error-1",
+      "kind": "exact",
+      "type": "error",
+      "repo": "dub",
+      "prompt": "Which file and line raises the error \"Fast settlement is only supported for ACH payment.\"? Answer as file:line, nothing else.",
+      "must": [
+        "confirm-payouts.ts:171"
+      ]
+    },
+    {
+      "id": "dub-v1-class-def",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "dub",
+      "prompt": "Which file and line defines the LemonSqueezyClient class? One line.",
+      "must": [
+        "lemonsqueezy/client.ts",
+        "59"
+      ],
+      "v1_id": "class-def"
+    },
+    {
+      "id": "dub-definition-1",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "dub",
+      "prompt": "Which file and line defines the ProcessedLinkProps type? Answer as file:line, nothing else.",
+      "must": [
+        "lib/types.ts:399"
+      ]
+    },
+    {
+      "id": "kubernetes-callers-1",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "kubernetes",
+      "prompt": "Which functions call RecheckDeletionTimestamp? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "claimPods",
+        "getPodsForJob",
+        "getReplicaSetsForDeployment",
+        "getDaemonPods",
+        "controlledHistories",
+        "canAdoptFunc",
+        "replica_set.go",
+        "job_controller.go",
+        "deployment_controller.go",
+        "daemon_controller.go",
+        "update.go",
+        "stateful_set.go"
+      ]
+    },
+    {
+      "id": "kubernetes-callers-2",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "kubernetes",
+      "prompt": "Which functions call MakeNestedMountpoints? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "SetUpAt",
+        "configmap.go",
+        "secret.go",
+        "projected.go",
+        "downwardapi.go"
+      ]
+    },
+    {
+      "id": "kubernetes-callees-1",
+      "kind": "structural",
+      "type": "callees",
+      "repo": "kubernetes",
+      "prompt": "What functions does GetEtcdImageTagFromStaticPod call? List the callee names only.",
+      "must": [
+        "GetStaticPodFilepath",
+        "ReadStaticPodFromDisk",
+        "TagFromImage",
+        "convertImageTagMetadataToSemver"
+      ]
+    },
+    {
+      "id": "kubernetes-chain-1",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "kubernetes",
+      "prompt": "Trace the call chain from the RunE handler of the \"kubeadm token create\" command down to encodeTokenSecretData. Ignore tests. List every function on the path in order, with file:line for each, nothing else.",
+      "must": [
+        "RunCreateToken",
+        "CreateNewTokens",
+        "UpdateOrCreateTokens",
+        "BootstrapTokenToSecret",
+        "encodeTokenSecretData",
+        "token.go",
+        "utils.go"
+      ]
+    },
+    {
+      "id": "kubernetes-chain-2",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "kubernetes",
+      "prompt": "Trace the call chain from the IPAddress add event handler addIPAddress in pkg/controller/servicecidrs/servicecidrs_controller.go down to PrefixContainsIP. Ignore tests. List every function on the path in order, with file:line for each, nothing else.",
+      "must": [
+        "addIPAddress",
+        "containingServiceCIDRs",
+        "ContainsAddress",
+        "PrefixContainsIP",
+        "servicecidrs_controller.go",
+        "servicecidr.go"
+      ]
+    },
+    {
+      "id": "kubernetes-impact-1",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "kubernetes",
+      "prompt": "If the signature of HashContainer changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "containerChanged",
+        "newContainerAnnotations",
+        "computePodActions",
+        "computeInitContainerActions",
+        "generateContainerConfig",
+        "kuberuntime_manager.go",
+        "labels.go",
+        "kuberuntime_container.go"
+      ]
+    },
+    {
+      "id": "kubernetes-impact-2",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "kubernetes",
+      "prompt": "If the signature of ConvertDownwardAPIFieldLabel changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "validateObjectFieldSelector",
+        "podFieldSelectorRuntimeValue",
+        "validateDownwardAPIVolumeFile",
+        "validateEnvVarValueFrom",
+        "makeEnvironmentVariables",
+        "validation.go",
+        "kubelet_pods.go"
+      ]
+    },
+    {
+      "id": "kubernetes-impact-3",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "kubernetes",
+      "prompt": "If the signature of GetNameForAuthorizerMode changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "LoadAndValidateData",
+        "buildAuthorizationConfiguration",
+        "LoadAndValidateFile",
+        "checkFile",
+        "ToAuthorizationConfig",
+        "config.go",
+        "authorization.go",
+        "reload.go"
+      ]
+    },
+    {
+      "id": "kubernetes-config-1",
+      "kind": "exact",
+      "type": "config",
+      "repo": "kubernetes",
+      "prompt": "What default does the kubelet apply to MaxPods when KubeletConfiguration leaves it unset, and which function in which file sets it? One line.",
+      "must": [
+        "110",
+        "SetDefaults_KubeletConfiguration",
+        "defaults.go"
+      ]
+    },
+    {
+      "id": "kubernetes-config-2",
+      "kind": "exact",
+      "type": "config",
+      "repo": "kubernetes",
+      "prompt": "What is the value of ProxyHealthzPort, and which file defines it? One line.",
+      "must": [
+        "10256",
+        "ports.go"
+      ]
+    },
+    {
+      "id": "kubernetes-env-1",
+      "kind": "exact",
+      "type": "env",
+      "repo": "kubernetes",
+      "prompt": "Which Go function reads the KUBE_PROXY_NFTABLES_SKIP_KERNEL_VERSION_CHECK environment variable? Answer with the file and function name, one line.",
+      "must": [
+        "supported.go",
+        "getNFTablesInterface"
+      ]
+    },
+    {
+      "id": "kubernetes-env-2",
+      "kind": "exact",
+      "type": "env",
+      "repo": "kubernetes",
+      "prompt": "Which Go function reads the KUBE_NETWORK environment variable? Answer with the file and function name, one line.",
+      "must": [
+        "proxier.go",
+        "getNetworkName"
+      ]
+    },
+    {
+      "id": "kubernetes-error-1",
+      "kind": "exact",
+      "type": "error",
+      "repo": "kubernetes",
+      "prompt": "Where is the error \"DisruptedPods map too big - too many evictions not confirmed by PDB controller\" raised? Ignore tests. Give the file:line, nothing else.",
+      "must": [
+        "eviction.go",
+        "456"
+      ]
+    },
+    {
+      "id": "kubernetes-error-2",
+      "kind": "exact",
+      "type": "error",
+      "repo": "kubernetes",
+      "prompt": "Where is the message \"Scheduler cache AssumePod failed\" logged? Give the file:line, nothing else.",
+      "must": [
+        "algorithm.go",
+        "626"
+      ]
+    },
+    {
+      "id": "kubernetes-definition-1",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "kubernetes",
+      "prompt": "Which file and line defines the HorizontalController struct? One line.",
+      "must": [
+        "horizontal.go",
+        "93"
+      ]
+    },
+    {
+      "id": "kubernetes-definition-2",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "kubernetes",
+      "prompt": "Which file and line defines the CreateKubeAPIServerConfig function? One line.",
+      "must": [
+        "server.go",
+        "210"
+      ]
+    },
+    {
+      "id": "vscode-callers-1",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "vscode",
+      "prompt": "Which functions call toElectronAccelerator? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "getElectronAcceleratorLabelForScanCodeChord",
+        "getElectronAcceleratorForKeyBinding",
+        "_getElectronAccelerator",
+        "macLinuxKeyboardMapper.ts",
+        "windowsKeyboardMapper.ts",
+        "usLayoutResolvedKeybinding.ts"
+      ]
+    },
+    {
+      "id": "vscode-callers-2",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "vscode",
+      "prompt": "Which functions call removeDangerousEnvVariables? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "client",
+        "createEnv",
+        "_createProcess",
+        "start",
+        "_start",
+        "ipc.cp.ts",
+        "utilityProcess.ts",
+        "remoteTerminalChannel.ts",
+        "extensionHostConnection.ts",
+        "localProcessExtensionHost.ts"
+      ]
+    },
+    {
+      "id": "vscode-callees-1",
+      "kind": "structural",
+      "type": "callees",
+      "repo": "vscode",
+      "prompt": "What functions does buildUserEnvironment call? List the callee names only.",
+      "must": [
+        "getNLSConfiguration",
+        "getResolvedShellEnv",
+        "join",
+        "readCaseInsensitive",
+        "setCaseInsensitive",
+        "removeNulls"
+      ]
+    },
+    {
+      "id": "vscode-chain-1",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "vscode",
+      "prompt": "Trace the call chain from the remote server's HTTP request handler, RemoteExtensionHostAgentServer.handleRequest in src/vs/server/node/remoteExtensionHostAgentServer.ts, down to renderWorkbenchTemplate. List every function on the path in order, with file:line for each, nothing else.",
+      "must": [
+        "handleRequest",
+        "handle",
+        "_handleRoot",
+        "renderWorkbenchTemplate",
+        "remoteExtensionHostAgentServer.ts",
+        "webClientServer.ts"
+      ]
+    },
+    {
+      "id": "vscode-chain-2",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "vscode",
+      "prompt": "Trace the call chain from the CLI entry point main() in src/vs/code/node/cli.ts down to parseArgs in src/vs/platform/environment/node/argv.ts. List every function on the path in order, with file:line for each, nothing else.",
+      "must": [
+        "main",
+        "parseCLIProcessArgv",
+        "parseAndValidate",
+        "parseArgs",
+        "cli.ts",
+        "argvHelper.ts",
+        "argv.ts"
+      ]
+    },
+    {
+      "id": "vscode-impact-1",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "vscode",
+      "prompt": "If the signature of isInnoSetupInstall changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "installMutex",
+        "checkInnoSetupMutex",
+        "getWin32UpdateType",
+        "afterWindowOpen",
+        "claimInstance",
+        "getUpdateType",
+        "app.ts",
+        "main.ts",
+        "win32UpdateType.ts",
+        "updateService.win32.ts"
+      ]
+    },
+    {
+      "id": "vscode-impact-2",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "vscode",
+      "prompt": "If the signature of layoutVirtualizedSections changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "layoutMcpSectionLists",
+        "layoutPluginSectionLists",
+        "layoutMigrationSectionLists",
+        "scheduleMcpSectionLayout",
+        "schedulePluginSectionLayout",
+        "scheduleMigrationSectionLayout",
+        "mcpListWidget.ts",
+        "pluginListWidget.ts",
+        "aiCustomizationManagementEditor.ts"
+      ]
+    },
+    {
+      "id": "vscode-impact-3",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "vscode",
+      "prompt": "If the signature of sortEditsByYieldTo changes, which non-test functions call it directly, and which functions call those? Ignore tests. Answer with the function name and file of each, grouped by level, nothing else.",
+      "must": [
+        "getPasteEdits",
+        "getDropEdits",
+        "doPasteInline",
+        "showPasteAsPick",
+        "onDropIntoEditor",
+        "copyPasteController.ts",
+        "dropIntoEditorController.ts"
+      ]
+    },
+    {
+      "id": "vscode-config-1",
+      "kind": "exact",
+      "type": "config",
+      "repo": "vscode",
+      "prompt": "What is the default value of the search.maxResults setting, and which constant in which file defines it? One line.",
+      "must": [
+        "20000",
+        "DEFAULT_MAX_SEARCH_RESULTS",
+        "search.ts"
+      ]
+    },
+    {
+      "id": "vscode-config-2",
+      "kind": "exact",
+      "type": "config",
+      "repo": "vscode",
+      "prompt": "What is the value of MATCHES_LIMIT, and which file defines it? One line.",
+      "must": [
+        "19999",
+        "findModel.ts"
+      ]
+    },
+    {
+      "id": "vscode-env-1",
+      "kind": "exact",
+      "type": "env",
+      "repo": "vscode",
+      "prompt": "Which file and function read the environment variable VSCODE_CLI_ENCODING? Ignore tests. Answer with the file path and the function name, nothing else.",
+      "must": [
+        "terminalEncoding.ts",
+        "resolveTerminalEncoding"
+      ]
+    },
+    {
+      "id": "vscode-env-2",
+      "kind": "exact",
+      "type": "env",
+      "repo": "vscode",
+      "prompt": "Which file and function read the environment variable DEV_WINDOW_SRC? Answer with the file path and the function name, nothing else.",
+      "must": [
+        "ipcMain.ts",
+        "validateEvent"
+      ]
+    },
+    {
+      "id": "vscode-error-1",
+      "kind": "exact",
+      "type": "error",
+      "repo": "vscode",
+      "prompt": "Which file and line raises the error \"ModelService: Cannot add model because it already exists!\"? Answer as file:line, nothing else.",
+      "must": [
+        "modelService.ts:352"
+      ]
+    },
+    {
+      "id": "vscode-error-2",
+      "kind": "exact",
+      "type": "error",
+      "repo": "vscode",
+      "prompt": "Which file and line logs the warning \"Shell integration failed to add capabilities within 10 seconds\"? Answer as file:line, nothing else.",
+      "must": [
+        "shellIntegrationAddon.ts:460"
+      ]
+    },
+    {
+      "id": "vscode-definition-1",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "vscode",
+      "prompt": "Which file and line defines the CursorsController class? Answer as file:line, nothing else.",
+      "must": [
+        "cursor.ts:27"
+      ]
+    },
+    {
+      "id": "vscode-definition-2",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "vscode",
+      "prompt": "Which file and line defines the ContextKeyExpression type? Answer as file:line, nothing else.",
+      "must": [
+        "contextkey.ts:84"
+      ]
+    }
+  ]
+}

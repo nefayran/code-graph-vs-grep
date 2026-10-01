@@ -1,0 +1,211 @@
+{
+  "repos": {
+    "dub": {
+      "url": "https://github.com/dubinc/dub",
+      "dir": "dub",
+      "commit": "d85e8839c3ee62c916f125b5b0710eb12a1f7892"
+    }
+  },
+  "questions": [
+    {
+      "id": "callers",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "dub",
+      "prompt": "Which functions or route files call createPaymentIntent? Ignore tests. Give the file:line of each call site, nothing else.",
+      "must": [
+        "renew/route.ts",
+        "renewal-payments/route.ts",
+        "retry-failed/route.ts",
+        "process-payout-invoice-failure.ts",
+        "initiate-premium-domain-registration.ts"
+      ]
+    },
+    {
+      "id": "callees",
+      "kind": "structural",
+      "type": "callees",
+      "repo": "dub",
+      "prompt": "What functions does approvePartner call? List the callee names only.",
+      "must": [
+        "getGroupOrThrow",
+        "throwIfPartnersLimitExceeded",
+        "queuePartnerSearchSync",
+        "dispatchWorkflows",
+        "trackActivityLog",
+        "trackApplicationEvents"
+      ]
+    },
+    {
+      "id": "dub-callers-1",
+      "kind": "structural",
+      "type": "callers",
+      "repo": "dub",
+      "prompt": "Which functions call recomputePartnerPayoutState? Ignore tests. Answer with the caller name and file:line of each call site, nothing else.",
+      "must": [
+        "recipient-configuration-updated.ts",
+        "recipient-account-closed.ts",
+        "account-updated.ts",
+        "account-application-deauthorized.ts",
+        "set-default-payout-method.ts",
+        "paypal/callback/route.ts"
+      ]
+    },
+    {
+      "id": "call-chain",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "dub",
+      "prompt": "Trace the call chain from the HTTP endpoint that approves a partner application down to the database write. Answer as an ordered list of file:line steps.",
+      "must": [
+        "approve/route.ts",
+        "approve-partner.ts",
+        "programEnrollment.update"
+      ]
+    },
+    {
+      "id": "dub-chain-1",
+      "kind": "structural",
+      "type": "chain",
+      "repo": "dub",
+      "prompt": "Trace the call path from the GET /api/cron/trial-emails handler down to differenceInCalendarDaysUTC. Answer as an ordered list of steps, each with the function name and file:line, nothing else.",
+      "must": [
+        "executeTrialEmailCronBatch",
+        "runTrialEmailCron",
+        "getDueTrialEmailTypes",
+        "differenceInCalendarDaysUTC"
+      ]
+    },
+    {
+      "id": "dub-impact-1",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "dub",
+      "prompt": "If the signature of fundFinancialAccount changes, which non-test functions call it directly, and which functions call those? Answer with the name and file:line of each function, as two lists (direct callers, then their callers), nothing else.",
+      "must": [
+        "createStablecoinPayout",
+        "queueStripePayouts",
+        "forceWithdrawal",
+        "send-stripe-payout/route.ts",
+        "charge-succeeded/route.ts"
+      ]
+    },
+    {
+      "id": "dub-impact-2",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "dub",
+      "prompt": "If the signature of getBillingStartDate changes, which non-test functions call it directly, and which functions call those? Answer with the name and file:line of each function, as two lists (direct callers, then their callers), nothing else.",
+      "must": [
+        "recomputeWorkspaceUsage",
+        "getNetworkInvitesUsage",
+        "updateWorkspacePlan",
+        "message-partner.ts",
+        "invite-partner-from-network.ts",
+        "invites-usage/route.ts"
+      ]
+    },
+    {
+      "id": "dub-impact-3",
+      "kind": "structural",
+      "type": "impact",
+      "repo": "dub",
+      "prompt": "If the signature of resolvePartnerMacros changes, which non-test functions call it directly, and which functions call those? Answer with the name and file:line of each function, as two lists (direct callers, then their callers), nothing else.",
+      "must": [
+        "applyAppsFlyerParameters",
+        "extractAndResolveUtmParams",
+        "generatePartnerLink",
+        "applyGroupUtmToLink",
+        "update-default-links/route.ts",
+        "sync-group-utm-job.ts"
+      ]
+    },
+    {
+      "id": "config-value",
+      "kind": "exact",
+      "type": "config",
+      "repo": "dub",
+      "prompt": "What is the highest page number allowed for offset pagination in the API, and which constant in which file sets it? One line.",
+      "must": [
+        "1000",
+        "MAX_OFFSET_PAGE",
+        "api/pagination.ts"
+      ]
+    },
+    {
+      "id": "const-value",
+      "kind": "exact",
+      "type": "config",
+      "repo": "dub",
+      "prompt": "What is the value of DEFAULT_PAGINATION_LIMIT, and which file defines it? One line.",
+      "must": [
+        "100",
+        "utils/src/constants/misc.ts"
+      ]
+    },
+    {
+      "id": "env-flag",
+      "kind": "exact",
+      "type": "env",
+      "repo": "dub",
+      "prompt": "Which file reads the environment variable PARTNER_SEARCH_READ_ENABLED, and at which line?",
+      "must": [
+        "search/provider.ts",
+        "34"
+      ]
+    },
+    {
+      "id": "dub-env-1",
+      "kind": "exact",
+      "type": "env",
+      "repo": "dub",
+      "prompt": "Which file and function read the environment variable VERCEL_GIT_COMMIT_REF? Answer with the file path and the function name, nothing else.",
+      "must": [
+        "send-via-resend.ts",
+        "resendEmailForOptions"
+      ]
+    },
+    {
+      "id": "error-string",
+      "kind": "exact",
+      "type": "error",
+      "repo": "dub",
+      "prompt": "Where does the API reject a metadata filter that mixes AND and OR? Give the file and the exact error message.",
+      "must": [
+        "metadata-filters.ts",
+        "Metadata query cannot mix AND and OR"
+      ]
+    },
+    {
+      "id": "dub-error-1",
+      "kind": "exact",
+      "type": "error",
+      "repo": "dub",
+      "prompt": "Which file and line raises the error \"Fast settlement is only supported for ACH payment.\"? Answer as file:line, nothing else.",
+      "must": [
+        "confirm-payouts.ts:171"
+      ]
+    },
+    {
+      "id": "class-def",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "dub",
+      "prompt": "Which file and line defines the LemonSqueezyClient class? One line.",
+      "must": [
+        "lemonsqueezy/client.ts",
+        "59"
+      ]
+    },
+    {
+      "id": "dub-definition-1",
+      "kind": "exact",
+      "type": "definition",
+      "repo": "dub",
+      "prompt": "Which file and line defines the ProcessedLinkProps type? Answer as file:line, nothing else.",
+      "must": [
+        "lib/types.ts:399"
+      ]
+    }
+  ]
+}
